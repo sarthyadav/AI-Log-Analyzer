@@ -1,0 +1,20 @@
+Started by user Sarthak Yadav
+Running as SYSTEM
+Building in workspace C:\ProgramData\Jenkins\.jenkins\workspace\fail-dependency-issue
+[fail-dependency-issue] $ cmd /c call C:\WINDOWS\TEMP\jenkins18318795874125708741.bat
+
+C:\ProgramData\Jenkins\.jenkins\workspace\fail-dependency-issue>echo [INFO] Scanning for projects... 
+[INFO] Scanning for projects...
+
+C:\ProgramData\Jenkins\.jenkins\workspace\fail-dependency-issue>echo [ERROR] Could not resolve dependencies for project my-app 
+[ERROR] Could not resolve dependencies for project my-app
+
+C:\ProgramData\Jenkins\.jenkins\workspace\fail-dependency-issue>echo [ERROR] Could not find artifact com.fasterxml.jackson.core:jackson-databind:jar:2.99.0 
+[ERROR] Could not find artifact com.fasterxml.jackson.core:jackson-databind:jar:2.99.0
+
+C:\ProgramData\Jenkins\.jenkins\workspace\fail-dependency-issue>echo [INFO] BUILD FAILURE 
+[INFO] BUILD FAILURE
+
+C:\ProgramData\Jenkins\.jenkins\workspace\fail-dependency-issue>exit /b 1 
+Build step 'Execute Windows batch command' marked build as failure
+Finished: FAILURE

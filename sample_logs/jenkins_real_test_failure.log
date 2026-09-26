@@ -1,0 +1,23 @@
+Started by user Sarthak Yadav
+Running as SYSTEM
+Building in workspace C:\ProgramData\Jenkins\.jenkins\workspace\fail-test-failure
+[fail-test-failure] $ cmd /c call C:\WINDOWS\TEMP\jenkins298654552660592430.bat
+
+C:\ProgramData\Jenkins\.jenkins\workspace\fail-test-failure>echo [INFO] Running com.example.OrderServiceTest 
+[INFO] Running com.example.OrderServiceTest
+
+C:\ProgramData\Jenkins\.jenkins\workspace\fail-test-failure>echo [INFO] Tests run: 8, Failures: 1, Errors: 0, Skipped: 0 
+[INFO] Tests run: 8, Failures: 1, Errors: 0, Skipped: 0
+
+C:\ProgramData\Jenkins\.jenkins\workspace\fail-test-failure>echo [ERROR] testCalculateTotalPrice(com.example.OrderServiceTest) 
+[ERROR] testCalculateTotalPrice(com.example.OrderServiceTest)
+
+C:\ProgramData\Jenkins\.jenkins\workspace\fail-test-failure>echo   expected: <150.00> but was: <135.00> 
+  expected: <150.00> but was: <135.00>
+
+C:\ProgramData\Jenkins\.jenkins\workspace\fail-test-failure>echo [INFO] BUILD FAILURE 
+[INFO] BUILD FAILURE
+
+C:\ProgramData\Jenkins\.jenkins\workspace\fail-test-failure>exit /b 1 
+Build step 'Execute Windows batch command' marked build as failure
+Finished: FAILURE

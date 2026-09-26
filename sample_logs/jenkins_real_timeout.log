@@ -1,0 +1,23 @@
+Started by user Sarthak Yadav
+Running as SYSTEM
+Building in workspace C:\ProgramData\Jenkins\.jenkins\workspace\fail-timeout
+[fail-timeout] $ cmd /c call C:\WINDOWS\TEMP\jenkins6469665758841360552.bat
+
+C:\ProgramData\Jenkins\.jenkins\workspace\fail-timeout>echo [INFO] Starting integration tests... 
+[INFO] Starting integration tests...
+
+C:\ProgramData\Jenkins\.jenkins\workspace\fail-timeout>echo [INFO] Waiting for service health check... (30s elapsed) 
+[INFO] Waiting for service health check... (30s elapsed)
+
+C:\ProgramData\Jenkins\.jenkins\workspace\fail-timeout>echo [INFO] Waiting for service health check... (60s elapsed) 
+[INFO] Waiting for service health check... (60s elapsed)
+
+C:\ProgramData\Jenkins\.jenkins\workspace\fail-timeout>echo [ERROR] Timeout: no output for 120 seconds 
+[ERROR] Timeout: no output for 120 seconds
+
+C:\ProgramData\Jenkins\.jenkins\workspace\fail-timeout>echo [INFO] BUILD FAILURE 
+[INFO] BUILD FAILURE
+
+C:\ProgramData\Jenkins\.jenkins\workspace\fail-timeout>exit /b 1 
+Build step 'Execute Windows batch command' marked build as failure
+Finished: FAILURE
