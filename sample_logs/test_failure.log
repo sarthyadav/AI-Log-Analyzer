@@ -1,0 +1,12 @@
+[INFO] Running com.example.OrderServiceTest
+[INFO] Tests run: 8, Failures: 1, Errors: 0, Skipped: 0
+
+[ERROR] testCalculateTotalPrice(com.example.OrderServiceTest)
+  Time elapsed: 0.045 s  <<< FAILURE!
+  org.opentest4j.AssertionFailedError:
+  expected: <150.00>
+   but was: <135.00>
+    at com.example.OrderServiceTest.testCalculateTotalPrice(OrderServiceTest.java:34)
+
+[INFO] BUILD FAILURE
+[INFO] Total time: 4.892 s

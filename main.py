@@ -1,13 +1,12 @@
 # main.py
-# entry point for the project - now routing to a category-specific prompt
-# for root-cause analysis and a suggested fix
+# entry point for the project - now accepts a log file path as a command
+# line argument instead of a hardcoded path, and prints results cleanly
 
+import argparse
 from llm_client import get_llm_response
 
 VALID_CATEGORIES = ["compile error", "test failure", "timeout", "dependency issue"]
 
-# each category gets its own tailored instruction, since the kind of
-# reasoning needed is genuinely different per failure type
 CATEGORY_PROMPTS = {
     "compile error": """Focus on syntax errors, type mismatches, missing imports,
 or misconfigured build files. Identify the exact line(s) causing the failure.""",
@@ -67,7 +66,6 @@ def analyze_log(log_content, category):
     """
     Given a log and its classified category, asks the LLM for a root-cause
     analysis and a suggested fix, using a category-specific prompt.
-    Returns the analysis as plain text.
     """
     if category not in CATEGORY_PROMPTS:
         category_instruction = "Analyze this build failure as best you can."
@@ -93,12 +91,41 @@ Log:
     return get_llm_response(prompt)
 
 
-log_path = "sample_logs/compile_error.log"
-log_content = read_log_file(log_path)
+def print_report(file_path, category, analysis):
+    """
+    Prints a clean, readable report of the classification and analysis.
+    Purely presentation - keeps formatting concerns separate from the
+    actual classification/analysis logic above.
+    """
+    print("=" * 60)
+    print(f"Jenkins Build Log Analysis: {file_path}")
+    print("=" * 60)
+    print(f"\nDetected Category: {category.upper()}\n")
+    print("-" * 60)
+    print(analysis)
+    print("=" * 60)
 
-category = classify_log(log_content)
-print(f"Detected failure category: {category}\n")
 
-analysis = analyze_log(log_content, category)
-print("--- Analysis ---")
-print(analysis)
+def main():
+    parser = argparse.ArgumentParser(
+        description="Analyze a Jenkins build failure log using an LLM."
+    )
+    parser.add_argument(
+        "log_file",
+        help="Path to the Jenkins build failure log file"
+    )
+    args = parser.parse_args()
+
+    try:
+        log_content = read_log_file(args.log_file)
+    except FileNotFoundError as error:
+        print(f"Error: {error}")
+        return
+
+    category = classify_log(log_content)
+    analysis = analyze_log(log_content, category)
+
+    print_report(args.log_file, category, analysis)
+
+if __name__ == "__main__":
+    main()

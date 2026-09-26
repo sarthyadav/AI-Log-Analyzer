@@ -1,0 +1,11 @@
+[INFO] Starting integration tests...
+[INFO] Connecting to database at db.internal:5432
+[INFO] Waiting for service health check...
+[INFO] Waiting for service health check... (30s elapsed)
+[INFO] Waiting for service health check... (60s elapsed)
+[INFO] Waiting for service health check... (90s elapsed)
+[ERROR] Build step 'Execute shell' marked build as failure
+[ERROR] Timeout: no output for 120 seconds
+[INFO] Sending interrupt signal to process
+[INFO] BUILD FAILURE
+[INFO] Total time: 120.5 s

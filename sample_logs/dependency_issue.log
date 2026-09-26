@@ -1,0 +1,8 @@
+[INFO] Scanning for projects...
+[INFO] Building my-app 1.0-SNAPSHOT
+[ERROR] Failed to execute goal on project my-app: Could not resolve dependencies
+  for project com.example:my-app:jar:1.0-SNAPSHOT:
+  Could not find artifact com.fasterxml.jackson.core:jackson-databind:jar:2.99.0
+  in central (https://repo.maven.apache.org/maven2)
+[ERROR] Version 2.99.0 does not exist. Latest available version is 2.17.1
+[INFO] BUILD FAILURE
