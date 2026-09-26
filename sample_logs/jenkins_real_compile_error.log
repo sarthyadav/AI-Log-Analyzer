@@ -1,0 +1,20 @@
+Started by user Sarthak Yadav
+Running as SYSTEM
+Building in workspace C:\ProgramData\Jenkins\.jenkins\workspace\fail-test-compile-error
+[fail-test-compile-error] $ cmd /c call C:\WINDOWS\TEMP\jenkins9036121894937575148.bat
+
+C:\ProgramData\Jenkins\.jenkins\workspace\fail-test-compile-error>echo [INFO] Scanning for projects... 
+[INFO] Scanning for projects...
+
+C:\ProgramData\Jenkins\.jenkins\workspace\fail-test-compile-error>echo [INFO] Building my-app 1.0-SNAPSHOT 
+[INFO] Building my-app 1.0-SNAPSHOT
+
+C:\ProgramData\Jenkins\.jenkins\workspace\fail-test-compile-error>echo [ERROR] OrderService.java:[45,32] cannot find symbol: variable orderRepository 
+[ERROR] OrderService.java:[45,32] cannot find symbol: variable orderRepository
+
+C:\ProgramData\Jenkins\.jenkins\workspace\fail-test-compile-error>echo [ERROR] Compilation failure 
+[ERROR] Compilation failure
+
+C:\ProgramData\Jenkins\.jenkins\workspace\fail-test-compile-error>exit /b 1 
+Build step 'Execute Windows batch command' marked build as failure
+Finished: FAILURE
