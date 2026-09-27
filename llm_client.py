@@ -50,5 +50,18 @@ def get_llm_response(prompt, temperature=0.2):
     and returns just the plain text response as a string.
     """
     chat_model = _get_chat_model(temperature)
-    response = chat_model.invoke(prompt)
+
+    try:
+        response = chat_model.invoke(prompt)
+    except Exception as error:
+        if LLM_PROVIDER == "ollama":
+            raise ConnectionError(
+                "Could not reach Ollama. Is it running? "
+                "Try running 'ollama serve' or check that the Ollama app is open."
+            ) from error
+        else:
+            raise ConnectionError(
+                f"Failed to get a response from {LLM_PROVIDER}: {error}"
+            ) from error
+
     return response.content

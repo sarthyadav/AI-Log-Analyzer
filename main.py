@@ -33,8 +33,11 @@ CLASSIFICATION_PROMPT = PromptTemplate(
     template="""You are analyzing a Jenkins build failure log.
 Classify this failure into exactly ONE of these categories: {categories_list}
 
-Respond with ONLY the category name, in lowercase, and nothing else.
-Do not explain your reasoning. Do not add punctuation.
+If the content does not look like a real build failure log at all, respond
+with exactly: unrelated
+
+Respond with ONLY the category name (or "unrelated"), in lowercase, and
+nothing else. Do not explain your reasoning. Do not add punctuation.
 
 Log:
 {log_content}
@@ -66,19 +69,27 @@ Log:
 def read_log_file(file_path):
     """
     Reads the contents of a build log file and returns it as a string.
+    Raises clear errors for missing files or empty content, rather than
+    letting an empty log silently proceed into classification.
     """
     try:
         with open(file_path, "r") as file:
-            return file.read()
+            content = file.read()
     except FileNotFoundError:
         raise FileNotFoundError(f"Could not find log file at: {file_path}")
+
+    if not content.strip():
+        raise ValueError(f"Log file is empty: {file_path}")
+
+    return content
 
 
 def classify_log(log_content):
     """
     Asks the LLM to classify the build failure into one of the fixed
-    categories in VALID_CATEGORIES. Returns the category as a lowercase
-    string, or "unknown" if the LLM didn't return a recognizable category.
+    categories in VALID_CATEGORIES, or "unrelated" if the content doesn't
+    look like a real build log. Returns "unknown" only if the LLM's
+    response doesn't match any expected value at all.
     """
     categories_list = ", ".join(VALID_CATEGORIES)
 
@@ -92,15 +103,20 @@ def classify_log(log_content):
 
     if cleaned_response in VALID_CATEGORIES:
         return cleaned_response
+    elif cleaned_response == "unrelated":
+        return "unrelated"
     else:
         return "unknown"
-
 
 def analyze_log(log_content, category):
     """
     Given a log and its classified category, asks the LLM for a root-cause
     analysis and a suggested fix, using a category-specific prompt.
     """
+    if category == "unrelated":
+        return ("This content does not appear to be a build failure log, "
+                "so no analysis was performed.")
+
     if category not in CATEGORY_INSTRUCTIONS:
         category_instruction = "Analyze this build failure as best you can."
     else:
@@ -140,12 +156,16 @@ def main():
 
     try:
         log_content = read_log_file(args.log_file)
-    except FileNotFoundError as error:
+    except (FileNotFoundError, ValueError) as error:
         print(f"Error: {error}")
         return
 
-    category = classify_log(log_content)
-    analysis = analyze_log(log_content, category)
+    try:
+        category = classify_log(log_content)
+        analysis = analyze_log(log_content, category)
+    except ConnectionError as error:
+        print(f"Error: {error}")
+        return
 
     print_report(args.log_file, category, analysis)
 
