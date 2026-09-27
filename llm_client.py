@@ -2,11 +2,16 @@
 # this file's whole job is: "given a prompt, return the LLM's text response"
 # nothing else in my project should need to know whether that response came
 # from a free local model or the real Claude API - this file hides that detail
+#
+# now using LangChain's chat model wrappers instead of calling ollama/anthropic
+# directly - LangChain gives both providers the same .invoke() interface,
+# so switching providers is just picking a different object, not different
+# function calls like before
 
 import os
-import ollama
 from dotenv import load_dotenv
-from anthropic import Anthropic
+from langchain_ollama import ChatOllama
+from langchain_anthropic import ChatAnthropic
 
 load_dotenv()
 
@@ -15,44 +20,35 @@ load_dotenv()
 LLM_PROVIDER = "ollama"
 
 
-def get_llm_response(prompt, temperature=0.2):
+def _get_chat_model(temperature):
     """
-    Sends a prompt to whichever LLM provider is currently configured,
-    and returns just the plain text response as a string.
-
-    temperature controls how random/creative the response is - lower
-    values (closer to 0) give more consistent, repeatable answers, which
-    matters a lot for tasks like classification where we need a reliable
-    format every time. Defaults to 0.2 since most of what I ask this
-    function to do needs to be consistent, not creative.
+    Returns a LangChain chat model object for whichever provider is
+    currently configured. Both ChatOllama and ChatAnthropic expose the
+    same .invoke() method, which is the whole point of using LangChain
+    here - the rest of my code doesn't need to know which one it got.
     """
     if LLM_PROVIDER == "ollama":
-        return _call_ollama(prompt, temperature)
+        return ChatOllama(model="llama3.2", temperature=temperature)
+
     elif LLM_PROVIDER == "claude":
-        return _call_claude(prompt, temperature)
+        api_key = os.getenv("ANTHROPIC_API_KEY")
+        if api_key is None:
+            raise ValueError("ANTHROPIC_API_KEY not found - check your .env file")
+        return ChatAnthropic(
+            model="claude-sonnet-4-5",
+            temperature=temperature,
+            api_key=api_key
+        )
+
     else:
         raise ValueError(f"Unknown LLM_PROVIDER: {LLM_PROVIDER}")
 
 
-def _call_ollama(prompt, temperature):
-    response = ollama.chat(
-        model="llama3.2",
-        messages=[{"role": "user", "content": prompt}],
-        options={"temperature": temperature}
-    )
-    return response["message"]["content"]
-
-
-def _call_claude(prompt, temperature):
-    api_key = os.getenv("ANTHROPIC_API_KEY")
-    if api_key is None:
-        raise ValueError("ANTHROPIC_API_KEY not found - check your .env file")
-
-    client = Anthropic(api_key=api_key)
-    response = client.messages.create(
-        model="claude-sonnet-4-5",
-        max_tokens=500,
-        temperature=temperature,
-        messages=[{"role": "user", "content": prompt}]
-    )
-    return response.content[0].text
+def get_llm_response(prompt, temperature=0.2):
+    """
+    Sends a prompt to whichever LLM provider is currently configured,
+    and returns just the plain text response as a string.
+    """
+    chat_model = _get_chat_model(temperature)
+    response = chat_model.invoke(prompt)
+    return response.content
