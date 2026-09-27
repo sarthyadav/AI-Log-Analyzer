@@ -1,13 +1,14 @@
 # main.py
-# entry point for the project - now accepts a log file path as a command
-# line argument instead of a hardcoded path, and prints results cleanly
+# entry point for the project - now using LangChain's PromptTemplate to
+# formally define prompts instead of building them with raw f-strings
 
 import argparse
+from langchain_core.prompts import PromptTemplate
 from llm_client import get_llm_response
 
 VALID_CATEGORIES = ["compile error", "test failure", "timeout", "dependency issue"]
 
-CATEGORY_PROMPTS = {
+CATEGORY_INSTRUCTIONS = {
     "compile error": """Focus on syntax errors, type mismatches, missing imports,
 or misconfigured build files. Identify the exact line(s) causing the failure.""",
 
@@ -22,6 +23,44 @@ timeout threshold that's simply too short.""",
     "dependency issue": """Focus on version conflicts, missing packages,
 registry/network failures, or incompatible dependency versions.""",
 }
+
+# defining the classification prompt as a template with named placeholders,
+# instead of a raw f-string - {categories_list} and {log_content} get filled
+# in later via .format(), and LangChain validates that I actually provide
+# every variable the template expects
+CLASSIFICATION_PROMPT = PromptTemplate(
+    input_variables=["categories_list", "log_content"],
+    template="""You are analyzing a Jenkins build failure log.
+Classify this failure into exactly ONE of these categories: {categories_list}
+
+Respond with ONLY the category name, in lowercase, and nothing else.
+Do not explain your reasoning. Do not add punctuation.
+
+Log:
+{log_content}
+"""
+)
+
+# same idea for the analysis prompt - this one has three variables since
+# the category and its specific instruction both get plugged in
+ANALYSIS_PROMPT = PromptTemplate(
+    input_variables=["category", "category_instruction", "log_content"],
+    template="""You are an experienced CI/CD engineer reviewing a Jenkins
+build failure log. The failure has been classified as: {category}
+
+{category_instruction}
+
+Provide:
+1. A brief root-cause explanation
+2. A suggested fix
+
+Be concise and specific. This is a recommendation for a human engineer to
+review, not an instruction to be applied automatically.
+
+Log:
+{log_content}
+"""
+)
 
 
 def read_log_file(file_path):
@@ -43,15 +82,10 @@ def classify_log(log_content):
     """
     categories_list = ", ".join(VALID_CATEGORIES)
 
-    prompt = f"""You are analyzing a Jenkins build failure log.
-Classify this failure into exactly ONE of these categories: {categories_list}
-
-Respond with ONLY the category name, in lowercase, and nothing else.
-Do not explain your reasoning. Do not add punctuation.
-
-Log:
-{log_content}
-"""
+    prompt = CLASSIFICATION_PROMPT.format(
+        categories_list=categories_list,
+        log_content=log_content
+    )
 
     raw_response = get_llm_response(prompt, temperature=0.0)
     cleaned_response = raw_response.strip().lower()
@@ -67,26 +101,16 @@ def analyze_log(log_content, category):
     Given a log and its classified category, asks the LLM for a root-cause
     analysis and a suggested fix, using a category-specific prompt.
     """
-    if category not in CATEGORY_PROMPTS:
+    if category not in CATEGORY_INSTRUCTIONS:
         category_instruction = "Analyze this build failure as best you can."
     else:
-        category_instruction = CATEGORY_PROMPTS[category]
+        category_instruction = CATEGORY_INSTRUCTIONS[category]
 
-    prompt = f"""You are an experienced CI/CD engineer reviewing a Jenkins
-build failure log. The failure has been classified as: {category}
-
-{category_instruction}
-
-Provide:
-1. A brief root-cause explanation
-2. A suggested fix
-
-Be concise and specific. This is a recommendation for a human engineer to
-review, not an instruction to be applied automatically.
-
-Log:
-{log_content}
-"""
+    prompt = ANALYSIS_PROMPT.format(
+        category=category,
+        category_instruction=category_instruction,
+        log_content=log_content
+    )
 
     return get_llm_response(prompt)
 
@@ -94,8 +118,6 @@ Log:
 def print_report(file_path, category, analysis):
     """
     Prints a clean, readable report of the classification and analysis.
-    Purely presentation - keeps formatting concerns separate from the
-    actual classification/analysis logic above.
     """
     print("=" * 60)
     print(f"Jenkins Build Log Analysis: {file_path}")
@@ -126,6 +148,7 @@ def main():
     analysis = analyze_log(log_content, category)
 
     print_report(args.log_file, category, analysis)
+
 
 if __name__ == "__main__":
     main()
